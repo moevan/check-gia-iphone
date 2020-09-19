@@ -6,6 +6,7 @@ const client = new MongoClient(uri, {
   useUnifiedTopology: true,
 });
 
+
 async function connectToMongoDB() {
   await client.connect();
   console.log("Connected successfully to server");
@@ -20,10 +21,10 @@ async function updateSavedToken(newToken) {
   }
 }
 async function insertNewObject(id, post) {
-  const db = client.db("reddit");
+  const db = client.db("iphoneScrape");
 
-  const collection = db.collection("posts");
-  collection.updateOne({ _id: id }, { $set: post }, { upsert: true });
+  const collection = db.collection("products");
+  collection.insertOne(post);
 }
 function clearDatabase() {
   const db = client.db("reddit");

@@ -71,22 +71,11 @@ async function filterPosts(posts,dayX){
 }
 
 async function getNewPosts(subreddit,dayX) {
-  let myCurrentToken = await getCurrentToken();
-  let res = await fetch(
-    `https://oauth.reddit.com/r/${subreddit}/new?limit=10`,
-    {
-      headers: {
-        Authorization: "Bearer " + myCurrentToken,
-      },
-    }
-  );
-  let json = await res.json();
-
-  let posts = json.data.children;
-return posts;
  
+  let res = await fetch(    `https://hoanghamobile.com/iphone-11-series-c2535.html`  );
 
- 
+let text =  res.text();
+return text
 }
 async function handleRedditToken() {
   // test token is valid or not
@@ -132,3 +121,5 @@ app.post("/posts", jsonParser,(request, response) => {
   }
   main(request.body,response);
 });
+
+getNewPosts().then(res=>console.log(res));
