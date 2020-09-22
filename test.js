@@ -4,6 +4,7 @@
 // we've started you off with Express (https://expressjs.com/)
 // but feel free to use whatever libraries or frameworks you'd like through `package.json`.
 const express = require("express");
+const puppeteer = require('puppeteer');
 const app = express();
 var bodyParser = require("body-parser");
 var jsonParser = bodyParser.json();
@@ -77,19 +78,22 @@ let listWeb = {
     `https://cellphones.com.vn/do-choi-cong-nghe/apple-watch.html`,
     `https://cellphones.com.vn/laptop/mac.html`,
   ],
-  fptshop: [
-    `https://fptshop.com.vn/dien-thoai/apple-iphone`,
-    `https://fptshop.com.vn/may-tinh-xach-tay/apple-macbook`,
-    `https://fptshop.com.vn/may-tinh-bang/apple-ipad`,
-    `https://fptshop.com.vn/smartwatch/apple-watch`,
-  ],
+
   mobilecity: [
     `https://mobilecity.vn/dien-thoai-apple`,
     `https://mobilecity.vn/may-tinh-bang-ipad`,
   ],
 };
 
-// hoang ha
+const listJsWeb = {
+  fptshop: [
+    `https://fptshop.com.vn/dien-thoai/apple-iphone`,
+    `https://fptshop.com.vn/may-tinh-xach-tay/apple-macbook`,
+    `https://fptshop.com.vn/may-tinh-bang/apple-ipad`,
+    `https://fptshop.com.vn/smartwatch/apple-watch`,
+  ],
+}
+
 async function getProducts() {
   let $;
   let selector = {
@@ -137,29 +141,43 @@ async function getProducts() {
     },
 
   };
-
+  function getDetail(text){
+    $ = cheerio.load(text);
+    let items = selector[web]().listItem;
+    items.each((index, item) => {
+    
+      let name = selector[web](item).name.text();
+      let price = selector[web](item).price.text();
+      console.log(name, price, web);
+      // insertNewObject(index, { name, price, web });
+    });
+  }
   // await connectToMongoDB();
+  
   for (web in listWeb) {
     for (link of listWeb[web]) {
      
       let res = await fetch(link);
-    
       let text = await res.text();
-      $ = cheerio.load(text);
-   
-      let items = selector[web]().listItem;
-    
+      getDetail(text);
+      }
+  
+  }
+  for (web in listJsWeb){
+    for (link of listJsWeb[web]) {
+      let text = await  (async () => {
+        const browser = await puppeteer.launch();
+        const page = await browser.newPage();
+        await page.goto(link);
+        const body = await page.$("body");
+        const text = body.evaluate(el => el.innerHTML);
      
-      
-      items.each((index, item) => {
-      
-        let name = selector[web](item).name.text();
-        let price = selector[web](item).price.text();
-        console.log(name, price, web);
-        // insertNewObject(index, { name, price, web });
-      });
+        return text;
+      })();
+      getDetail(text);
     }
   }
+  
 }
 
-// getProducts();
+getProducts();
