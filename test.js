@@ -68,21 +68,7 @@ let listWeb = {
     `https://www.techone.vn/ipad`,
     `https://www.techone.vn/apple-watch`,
   ],
-  cellphones: [
-    `https://cellphones.com.vn/mobile/apple.html`,
-    `https://cellphones.com.vn/tablet/ipad-pro.html`,
-    `https://cellphones.com.vn/tablet/ipad-air.html`,
-    `https://cellphones.com.vn/tablet/ipad-mini.html`,
-    `https://cellphones.com.vn/tablet/ipad-10-2.html`,
-    `https://cellphones.com.vn/tablet/ipad-9-7.html`,
-    `https://cellphones.com.vn/do-choi-cong-nghe/apple-watch.html`,
-    `https://cellphones.com.vn/laptop/mac.html`,
-  ],
 
-  mobilecity: [
-    `https://mobilecity.vn/dien-thoai-apple`,
-    `https://mobilecity.vn/may-tinh-bang-ipad`,
-  ],
 };
 
 const listJsWeb = {
@@ -91,6 +77,23 @@ const listJsWeb = {
     `https://fptshop.com.vn/may-tinh-xach-tay/apple-macbook`,
     `https://fptshop.com.vn/may-tinh-bang/apple-ipad`,
     `https://fptshop.com.vn/smartwatch/apple-watch`,
+  ],
+}
+const listAjaxWeb = {
+  // cellphones: [
+  //   `https://cellphones.com.vn/mobile/apple.html`,
+  //   `https://cellphones.com.vn/tablet/ipad-pro.html`,
+  //   `https://cellphones.com.vn/tablet/ipad-air.html`,
+  //   `https://cellphones.com.vn/tablet/ipad-mini.html`,
+  //   `https://cellphones.com.vn/tablet/ipad-10-2.html`,
+  //   `https://cellphones.com.vn/tablet/ipad-9-7.html`,
+  //   `https://cellphones.com.vn/do-choi-cong-nghe/apple-watch.html`,
+  //   `https://cellphones.com.vn/laptop/mac.html`,
+  // ],
+
+  mobilecity: [
+    `https://mobilecity.vn/dien-thoai-apple`,
+    `https://mobilecity.vn/may-tinh-bang-ipad`,
   ],
 }
 
@@ -154,30 +157,57 @@ async function getProducts() {
   }
   // await connectToMongoDB();
   
-  for (web in listWeb) {
-    for (link of listWeb[web]) {
+  // for (web in listWeb) {
+  //   for (link of listWeb[web]) {
      
-      let res = await fetch(link);
-      let text = await res.text();
-      getDetail(text);
-      }
+  //     let res = await fetch(link);
+  //     let text = await res.text();
+  //     getDetail(text);
+  //     }
   
-  }
-  for (web in listJsWeb){
-    for (link of listJsWeb[web]) {
-      let text = await  (async () => {
+  // }
+  // for (web in listJsWeb){
+  //   for (link of listJsWeb[web]) {
+  //     let text = await  (async () => {
+  //       const browser = await puppeteer.launch();
+  //       const page = await browser.newPage();
+  //       await page.goto(link);
+  //       const body = await page.$("body");
+  //       const text = body.evaluate(el => el.innerHTML);
+     
+  //       return text;
+  //     })();
+  //     getDetail(text);
+  //   }
+  // }
+  
+for (web in listAjaxWeb){
+  for (link of listAjaxWeb[web]){
+         let text = await  (async () => {
         const browser = await puppeteer.launch();
         const page = await browser.newPage();
         await page.goto(link);
         const body = await page.$("body");
+        page.click(".more");
+        page.click(".more");
+        const isMoreVisible =  await page.waitForSelector('.viewmore', {
+          visible: true,
+        })
+        console.log(isMoreVisible);
+        // while (isMoreVisible){
+        //   page.click(".more");
+        // }
+        
         const text = body.evaluate(el => el.innerHTML);
-     
+
+        
+
         return text;
       })();
       getDetail(text);
-    }
   }
-  
+}
+
 }
 
 getProducts();
