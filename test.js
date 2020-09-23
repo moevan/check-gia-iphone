@@ -93,7 +93,7 @@ const listAjaxWeb = {
 
   mobilecity: [
     `https://mobilecity.vn/dien-thoai-apple`,
-    `https://mobilecity.vn/may-tinh-bang-ipad`,
+    // `https://mobilecity.vn/may-tinh-bang-ipad`,
   ],
 }
 
@@ -187,24 +187,27 @@ for (web in listAjaxWeb){
         const browser = await puppeteer.launch();
         const page = await browser.newPage();
         await page.goto(link);
-        const body = await page.$("body");
-        page.click(".more");
-        page.click(".more");
-        const isMoreVisible =  await page.waitForSelector('.viewmore', {
-          visible: true,
-        })
-        console.log(isMoreVisible);
-        // while (isMoreVisible){
-        //   page.click(".more");
-        // }
+       
+     
         
+      
+    
+      const [response] = await Promise.all([
+        // page.waitForNavigation(),
+        page.click("#product_view_more"),
+      ]);
+      console.log(response);
+    let viewmore = await page.$(".viewmore");
+    const content = await viewmore.evaluate(el => el.outerHTML);
+   console.log(content);
+                
+        
+        
+      const body = await page.$("body");
         const text = body.evaluate(el => el.innerHTML);
-
-        
-
         return text;
       })();
-      getDetail(text);
+      // getDetail(text);
   }
 }
 
