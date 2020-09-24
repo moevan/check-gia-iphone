@@ -4,7 +4,7 @@
 // we've started you off with Express (https://expressjs.com/)
 // but feel free to use whatever libraries or frameworks you'd like through `package.json`.
 const express = require("express");
-const puppeteer = require('puppeteer');
+const puppeteer = require("puppeteer");
 const app = express();
 var bodyParser = require("body-parser");
 var jsonParser = bodyParser.json();
@@ -68,7 +68,6 @@ let listWeb = {
     `https://www.techone.vn/ipad`,
     `https://www.techone.vn/apple-watch`,
   ],
-
 };
 
 const listJsWeb = {
@@ -78,7 +77,7 @@ const listJsWeb = {
     `https://fptshop.com.vn/may-tinh-bang/apple-ipad`,
     `https://fptshop.com.vn/smartwatch/apple-watch`,
   ],
-}
+};
 const listAjaxWeb = {
   // cellphones: [
   //   `https://cellphones.com.vn/mobile/apple.html`,
@@ -95,7 +94,7 @@ const listAjaxWeb = {
     `https://mobilecity.vn/dien-thoai-apple`,
     // `https://mobilecity.vn/may-tinh-bang-ipad`,
   ],
-}
+};
 
 async function getProducts() {
   let $;
@@ -142,13 +141,11 @@ async function getProducts() {
         price: $(".price", item),
       };
     },
-
   };
-  function getDetail(text){
+  function getDetail(text) {
     $ = cheerio.load(text);
     let items = selector[web]().listItem;
     items.each((index, item) => {
-    
       let name = selector[web](item).name.text();
       let price = selector[web](item).price.text();
       console.log(name, price, web);
@@ -156,15 +153,15 @@ async function getProducts() {
     });
   }
   // await connectToMongoDB();
-  
+
   // for (web in listWeb) {
   //   for (link of listWeb[web]) {
-     
+
   //     let res = await fetch(link);
   //     let text = await res.text();
   //     getDetail(text);
   //     }
-  
+
   // }
   // for (web in listJsWeb){
   //   for (link of listJsWeb[web]) {
@@ -174,43 +171,66 @@ async function getProducts() {
   //       await page.goto(link);
   //       const body = await page.$("body");
   //       const text = body.evaluate(el => el.innerHTML);
-     
+
   //       return text;
   //     })();
   //     getDetail(text);
   //   }
   // }
-  
-for (web in listAjaxWeb){
-  for (link of listAjaxWeb[web]){
-         let text = await  (async () => {
+
+  for (web in listAjaxWeb) {
+    for (link of listAjaxWeb[web]) {
+      let text = await (async () => {
         const browser = await puppeteer.launch();
         const page = await browser.newPage();
+
         await page.goto(link);
-       
-     
-        
-      
+
+        await page.setCookie(
+          { name: "location", value: "1" },
+          { name: "location_name", value: "Hà Nội" }
+        );
+
+        await page.reload();
+
+        const button = await page.$("#product_view_more");
+        const div = await page.$(".viewmore");
+
+        viewmoreVisible = async function () {
+                  const style = await div.evaluate((el) => el.getAttribute("style"));
+          // const html = await div.evaluate((el) => el.outerHTML);
+          console.log("chay viewMoreVisible");
+                   return style == null;
+        };
+        let x =3;
+        viewmoreVisible = async function(){
+          
     
-      const [response] = await Promise.all([
-        // page.waitForNavigation(),
-        page.click("#product_view_more"),
-      ]);
-      console.log(response);
-    let viewmore = await page.$(".viewmore");
-    const content = await viewmore.evaluate(el => el.outerHTML);
-   console.log(content);
-                
+          return false;
+          
+        }
         
-        
-      const body = await page.$("body");
-        const text = body.evaluate(el => el.innerHTML);
-        return text;
+        let condition = await viewmoreVisible(div);
+
+            console.log('dau tien', condition);
+     
+        while (condition) {
+          (async () => {
+          
+            // await button.click();
+            // await page.waitForTimeout(1000);
+            console.log(34);
+            console.log('sau do', condition);
+            condition =  viewmoreVisible();
+            console.log('sau do', condition)
+            return 2;
+          })();
+        }
+       
       })();
       // getDetail(text);
+    }
   }
-}
-
 }
 
 getProducts();
