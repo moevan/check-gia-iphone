@@ -100,15 +100,26 @@ const mobileCity = {
   ],
 };
 const cellPhones = {
-  cellphones: [
+  cellphonesPages: [
+    `https://cellphones.com.vn/do-choi-cong-nghe/apple-watch.html`,
     `https://cellphones.com.vn/mobile/apple.html`,
     `https://cellphones.com.vn/tablet/ipad-pro.html`,
     `https://cellphones.com.vn/tablet/ipad-air.html`,
     `https://cellphones.com.vn/tablet/ipad-mini.html`,
     `https://cellphones.com.vn/tablet/ipad-10-2.html`,
     `https://cellphones.com.vn/tablet/ipad-9-7.html`,
-    `https://cellphones.com.vn/do-choi-cong-nghe/apple-watch.html`,
+
     `https://cellphones.com.vn/laptop/mac.html`,
+  ],
+  cookies: [
+    {
+      location: "Ha Noi",
+      value: "hanoi",
+    },
+    {
+      location: "Ho Chi Minh",
+      value: ""
+    }
   ],
 };
 
@@ -138,9 +149,9 @@ async function getProducts() {
     },
     cellphones: function (item) {
       return {
-        listItem: $(".cate-pro-short"),
+        listItem: $("[data-id]"),
         name: $("#product_link", item),
-        price: $(".price", item),
+        price: $(".price",".special-price", item),
       };
     },
     fptshop: function (item) {
@@ -171,29 +182,29 @@ async function getProducts() {
 
   await connectToMongoDB();
   await clearDatabase();
-  // for (web in listWeb) {
-  //   for (link of listWeb[web]) {
+  for (web in listWeb) {
+    for (link of listWeb[web]) {
 
-  //     let res = await fetch(link);
-  //     let text = await res.text();
-  //     getDetail(text,web);
-  //     }
+      let res = await fetch(link);
+      let text = await res.text();
+      getDetail(text,web);
+      }
 
-  // }
-  // for (web in listJsWeb){
-  //   for (link of listJsWeb[web]) {
-  //     let text = await  (async () => {
-  //       const browser = await puppeteer.launch();
-  //       const page = await browser.newPage();
-  //       await page.goto(link);
-  //       const body = await page.$("body");
-  //       const text = body.evaluate(el => el.innerHTML);
+  }
+  for (web in listJsWeb){
+    for (link of listJsWeb[web]) {
+      let text = await  (async () => {
+        const browser = await puppeteer.launch();
+        const page = await browser.newPage();
+        await page.goto(link);
+        const body = await page.$("body");
+        const text = body.evaluate(el => el.innerHTML);
 
-  //       return text;
-  //     })();
-  //     getDetail(text,web);
-  //   }
-  // }
+        return text;
+      })();
+      getDetail(text,web);
+    }
+  }
 
   for (link of mobileCity.mobilecityPages) {
     let web = "mobilecity";
@@ -229,6 +240,56 @@ async function getProducts() {
         const body = await page.$("body");
         const text = body.evaluate((el) => el.innerHTML);
 
+        return text;
+      })();
+
+      getDetail(text, web, cookie.location);
+    }
+  }
+
+  for (link of cellPhones.cellphonesPages) {
+    let web = "cellphones";
+
+    for (cookie of cellPhones.cookies) {
+      
+      let text = await (async () => {
+        const browser = await puppeteer.launch();
+        const page = await browser.newPage();
+        await page.goto(link);      
+        await page.setCookie({ name: "store", value: cookie.value });
+        await page.reload();
+        let body = await page.$("body");
+        let text = await body.evaluate((el) => el.innerHTML);
+        
+        
+
+        async function howManyPages(page) {
+          const pages = await page.$(".pagination", ".pages");
+          if (pages != null) {
+          
+            const quantity = await pages.evaluate(
+              (el) => Object.keys(el.children).length
+            );
+        
+            return quantity;
+          }
+          return 1;
+        }
+
+        pageNum = await howManyPages(page);
+
+        if (pageNum > 1) {
+          for (let i = 2; i < pageNum; i++) {
+            await page.goto(`${link}?p=${i}`);
+            let bodyNew = await page.$("body");
+            let textNew = await bodyNew.evaluate((el) => el.innerHTML);
+            text += textNew;
+          
+          }
+        }
+        
+  
+    
         return text;
       })();
 
