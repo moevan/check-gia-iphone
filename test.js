@@ -84,9 +84,20 @@ const mobileCity = {
     `https://mobilecity.vn/dien-thoai-apple`,
     `https://mobilecity.vn/may-tinh-bang-ipad`,
   ],
-  location: {
-
-  }
+  cookies: [
+    {
+      value: "1",
+      location: "Ha Noi",
+    },
+    {
+      value: "2",
+      location: "Ho Chi Minh",
+    },
+    {
+      value: "3",
+      location: "Da Nang",
+    },
+  ],
 };
 const cellPhones = {
   cellphones: [
@@ -98,8 +109,8 @@ const cellPhones = {
     `https://cellphones.com.vn/tablet/ipad-9-7.html`,
     `https://cellphones.com.vn/do-choi-cong-nghe/apple-watch.html`,
     `https://cellphones.com.vn/laptop/mac.html`,
-  ]
-}
+  ],
+};
 
 async function getProducts() {
   let $;
@@ -147,14 +158,14 @@ async function getProducts() {
       };
     },
   };
-  function getDetail(text,web,location) {
+  function getDetail(text, web, location) {
     $ = cheerio.load(text);
     let items = selector[web]().listItem;
     items.each((index, item) => {
       let name = selector[web](item).name.text();
       let price = selector[web](item).price.text();
-      console.log(name, price, web,location);
-      insertNewObject(index, { name, price, web,location });
+      console.log(name, price, web, location);
+      insertNewObject(index, { name, price, web, location });
     });
   }
 
@@ -184,10 +195,10 @@ async function getProducts() {
   //   }
   // }
 
-  
-    for (link of mobileCity.mobilecityPages) {
-      let web = 'mobilecity';
-      let location = 'Ha Noi';
+  for (link of mobileCity.mobilecityPages) {
+    let web = "mobilecity";
+
+    for (cookie of mobileCity.cookies) {
       let text = await (async () => {
         const browser = await puppeteer.launch();
         const page = await browser.newPage();
@@ -195,8 +206,8 @@ async function getProducts() {
         await page.goto(link);
 
         await page.setCookie(
-          { name: "location", value: "1" },
-          { name: "location_name", value: "Hà Nội" }
+          { name: "location", value: cookie.value },
+          { name: "location_name", value: cookie.location }
         );
 
         await page.reload();
@@ -205,29 +216,25 @@ async function getProducts() {
         const div = await page.$(".viewmore");
 
         isMorePosts = async function () {
-                  const style = await div.evaluate((el) => el.getAttribute("style"));
-                  console.log(style == null);
-                  if (style == null){
-                    await button.click();
-                    await page.waitForTimeout(1000);
-                    isMorePosts();
-      } 
-                 
+          const style = await div.evaluate((el) => el.getAttribute("style"));
+          console.log(style == null);
+          if (style == null) {
+            await button.click();
+            await page.waitForTimeout(1000);
+            isMorePosts();
+          }
         };
-              await isMorePosts();
-              
-              const body = await page.$("body");
-              const text = body.evaluate(el => el.innerHTML);
-      
-              return text;
-  
-       
+        await isMorePosts();
+
+        const body = await page.$("body");
+        const text = body.evaluate((el) => el.innerHTML);
+
+        return text;
       })();
 
-      getDetail(text,web,location);
-      
+      getDetail(text, web, cookie.location);
     }
   }
-
+}
 
 getProducts();
