@@ -78,23 +78,28 @@ const listJsWeb = {
     `https://fptshop.com.vn/smartwatch/apple-watch`,
   ],
 };
-const listAjaxWeb = {
-  // cellphones: [
-  //   `https://cellphones.com.vn/mobile/apple.html`,
-  //   `https://cellphones.com.vn/tablet/ipad-pro.html`,
-  //   `https://cellphones.com.vn/tablet/ipad-air.html`,
-  //   `https://cellphones.com.vn/tablet/ipad-mini.html`,
-  //   `https://cellphones.com.vn/tablet/ipad-10-2.html`,
-  //   `https://cellphones.com.vn/tablet/ipad-9-7.html`,
-  //   `https://cellphones.com.vn/do-choi-cong-nghe/apple-watch.html`,
-  //   `https://cellphones.com.vn/laptop/mac.html`,
-  // ],
 
-  mobilecity: [
+const mobileCity = {
+  mobilecityPages: [
     `https://mobilecity.vn/dien-thoai-apple`,
-    // `https://mobilecity.vn/may-tinh-bang-ipad`,
+    `https://mobilecity.vn/may-tinh-bang-ipad`,
   ],
+  location: {
+
+  }
 };
+const cellPhones = {
+  cellphones: [
+    `https://cellphones.com.vn/mobile/apple.html`,
+    `https://cellphones.com.vn/tablet/ipad-pro.html`,
+    `https://cellphones.com.vn/tablet/ipad-air.html`,
+    `https://cellphones.com.vn/tablet/ipad-mini.html`,
+    `https://cellphones.com.vn/tablet/ipad-10-2.html`,
+    `https://cellphones.com.vn/tablet/ipad-9-7.html`,
+    `https://cellphones.com.vn/do-choi-cong-nghe/apple-watch.html`,
+    `https://cellphones.com.vn/laptop/mac.html`,
+  ]
+}
 
 async function getProducts() {
   let $;
@@ -142,24 +147,25 @@ async function getProducts() {
       };
     },
   };
-  function getDetail(text) {
+  function getDetail(text,web,location) {
     $ = cheerio.load(text);
     let items = selector[web]().listItem;
     items.each((index, item) => {
       let name = selector[web](item).name.text();
       let price = selector[web](item).price.text();
-      console.log(name, price, web);
-      // insertNewObject(index, { name, price, web });
+      console.log(name, price, web,location);
+      insertNewObject(index, { name, price, web,location });
     });
   }
-  // await connectToMongoDB();
 
+  await connectToMongoDB();
+  await clearDatabase();
   // for (web in listWeb) {
   //   for (link of listWeb[web]) {
 
   //     let res = await fetch(link);
   //     let text = await res.text();
-  //     getDetail(text);
+  //     getDetail(text,web);
   //     }
 
   // }
@@ -174,12 +180,14 @@ async function getProducts() {
 
   //       return text;
   //     })();
-  //     getDetail(text);
+  //     getDetail(text,web);
   //   }
   // }
 
-  for (web in listAjaxWeb) {
-    for (link of listAjaxWeb[web]) {
+  
+    for (link of mobileCity.mobilecityPages) {
+      let web = 'mobilecity';
+      let location = 'Ha Noi';
       let text = await (async () => {
         const browser = await puppeteer.launch();
         const page = await browser.newPage();
@@ -206,14 +214,20 @@ async function getProducts() {
       } 
                  
         };
-        isMorePosts();
- 
+              await isMorePosts();
+              
+              const body = await page.$("body");
+              const text = body.evaluate(el => el.innerHTML);
+      
+              return text;
   
        
       })();
-      // getDetail(text);
+
+      getDetail(text,web,location);
+      
     }
   }
-}
+
 
 getProducts();

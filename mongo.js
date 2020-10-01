@@ -27,8 +27,8 @@ async function insertNewObject(id, post) {
   collection.insertOne(post);
 }
 function clearDatabase() {
-  const db = client.db("reddit");
-  db.collection("posts").drop();
+  const db = client.db("iphoneScrape");
+  db.collection("products").drop();
 }
 async function getCurrentToken() {
   try {
