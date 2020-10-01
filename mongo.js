@@ -43,9 +43,9 @@ async function getCurrentToken() {
   }
 }
 
-async function getObj(id) {
+async function getObj() {
   
-  const res = await client.db("reddit").collection("posts").find({});
+  const res = await client.db("iphoneScrape").collection("products").find({});
   
   return res.toArray();
 }

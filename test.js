@@ -18,7 +18,8 @@ const {
   getObj,
   clearDatabase,
 } = require("./mongo");
-const { isTokenValid, getNewToken } = require("./auth");
+const {insertData} = require("./sheets.js");
+const { isTokenValid, getNewToken } = require("./sheets");
 const moment = require("moment"); // require
 
 function getDomain(link) {
@@ -177,6 +178,8 @@ async function getProducts() {
       let price = selector[web](item).price.text();
       console.log(name, price, web, location);
       insertNewObject(index, { name, price, web, location });
+     
+    
     });
   }
 
@@ -298,4 +301,13 @@ async function getProducts() {
   }
 }
 
-getProducts();
+await getProducts();
+for (i=0;i<3;i++){
+  let resource = {
+    values: [
+      [1,1,1]
+     
+    ],
+  };  
+  insertData(resource);
+}
