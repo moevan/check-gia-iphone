@@ -198,26 +198,17 @@ async function getProducts() {
 
         isMorePosts = async function () {
                   const style = await div.evaluate((el) => el.getAttribute("style"));
-      
-                   return style == null;
+                  console.log(style == null);
+                  if (style == null){
+                    await button.click();
+                    await page.waitForTimeout(1000);
+                    isMorePosts();
+      } 
+                 
         };
-        
+        isMorePosts();
  
-        
-        let condition = true;
-
-         
-     
-        while (condition) {
-          (async () => {
-          
-            await button.click();
-            await page.waitForTimeout(1000);
-        
-            condition =  await isMorePosts();
-            
-          })();
-        }
+  
        
       })();
       // getDetail(text);
