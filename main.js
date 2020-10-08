@@ -96,15 +96,15 @@ const mobileCity = {
 };
 const cellPhones = {
   cellphonesPages: [
-    // `https://cellphones.com.vn/do-choi-cong-nghe/apple-watch.html`,
-    // `https://cellphones.com.vn/mobile/apple.html`,
-    // `https://cellphones.com.vn/tablet/ipad-pro.html`,
-    // `https://cellphones.com.vn/tablet/ipad-air.html`,
-    // `https://cellphones.com.vn/tablet/ipad-mini.html`,
+    `https://cellphones.com.vn/do-choi-cong-nghe/apple-watch.html`,
+    `https://cellphones.com.vn/mobile/apple.html`,
+    `https://cellphones.com.vn/tablet/ipad-pro.html`,
+    `https://cellphones.com.vn/tablet/ipad-air.html`,
+    `https://cellphones.com.vn/tablet/ipad-mini.html`,
 
-    // `https://cellphones.com.vn/tablet/ipad-9-7.html`,
+    `https://cellphones.com.vn/tablet/ipad-9-7.html`,
 
-    // `https://cellphones.com.vn/laptop/mac.html`,
+    `https://cellphones.com.vn/laptop/mac.html`,
     `https://cellphones.com.vn/tablet/ipad-10-2.html`,
   ],
   cookies: [
@@ -146,7 +146,7 @@ async function getProducts() {
     },
     cellphones: function (item) {
       return {
-        listItem: $("[data-id]"),
+        listItem: $("[data-id]", ".products-container"),
         name: $("#product_link", item),
         price: $(".price", ".special-price", item),
       };
@@ -175,7 +175,7 @@ async function getProducts() {
     items.each((index, item) => {
       let name = selector[web](item).name.text();
       let price = selector[web](item).price.text();
-      if (web == 'techone') {
+      if (web == 'techone' || web == 'hoanghamobile') {
 
         if (price.length > 11) {
           price = price.match(/(.*)₫(.*)₫/)[2];
@@ -310,5 +310,9 @@ async function getProducts() {
   }
 }
 
-getProducts();
-// insertData();
+
+
+(async function () {
+  await getProducts();
+  insertData();
+})();
