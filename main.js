@@ -173,11 +173,12 @@ async function getProducts() {
     $ = cheerio.load(text);
     let items = selector[web]().listItem;
     items.each((index, item) => {
-      let name = selector[web](item).name.text();
+      let name = selector[web](item).name.text().trim();
       let price = selector[web](item).price.text();
       if (web == 'techone' || web == 'hoanghamobile') {
 
-        if (price.length > 11) {
+        if (price.match(/₫/g) && price.match(/₫/g).length == 2) {
+
           price = price.match(/(.*)₫(.*)₫/)[2];
 
 
