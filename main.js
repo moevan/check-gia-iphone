@@ -155,7 +155,8 @@ async function getProducts() {
       return {
         listItem: $(".cdt-product"),
         name: $(".cdt-product__name", item),
-        price: $(".progress", item),
+        price: $(".price", item),
+        pricePromo: $(".progress", item)
       };
     },
     mobilecity: function (item) {
@@ -185,6 +186,7 @@ async function getProducts() {
         }
 
       }
+
 
       console.log(name, price, web, location);
       insertNewObject(index, { name, price, web, location });
