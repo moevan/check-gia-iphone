@@ -3,9 +3,9 @@
 
 // we've started you off with Express (https://expressjs.com/)
 // but feel free to use whatever libraries or frameworks you'd like through `package.json`.
-const express = require("express");
+
 const puppeteer = require("puppeteer");
-const app = express();
+
 var bodyParser = require("body-parser");
 var jsonParser = bodyParser.json();
 const cheerio = require("cheerio");
@@ -18,16 +18,10 @@ const {
   getObj,
   clearDatabase,
 } = require("./mongo");
-const {insertData} = require("./sheets.js");
+const { insertData } = require("./sheets.js");
 const { isTokenValid, getNewToken } = require("./sheets");
 const moment = require("moment"); // require
 
-function getDomain(link) {
-  let regex = /https:\/\/(.*?)\//g;
-  let res = regex.exec(link);
-  // link.match(regex)
-  return res[1];
-}
 
 let listWeb = {
   hoanghamobile: [
@@ -102,15 +96,16 @@ const mobileCity = {
 };
 const cellPhones = {
   cellphonesPages: [
-    `https://cellphones.com.vn/do-choi-cong-nghe/apple-watch.html`,
-    `https://cellphones.com.vn/mobile/apple.html`,
-    `https://cellphones.com.vn/tablet/ipad-pro.html`,
-    `https://cellphones.com.vn/tablet/ipad-air.html`,
-    `https://cellphones.com.vn/tablet/ipad-mini.html`,
-    `https://cellphones.com.vn/tablet/ipad-10-2.html`,
-    `https://cellphones.com.vn/tablet/ipad-9-7.html`,
+    // `https://cellphones.com.vn/do-choi-cong-nghe/apple-watch.html`,
+    // `https://cellphones.com.vn/mobile/apple.html`,
+    // `https://cellphones.com.vn/tablet/ipad-pro.html`,
+    // `https://cellphones.com.vn/tablet/ipad-air.html`,
+    // `https://cellphones.com.vn/tablet/ipad-mini.html`,
 
-    `https://cellphones.com.vn/laptop/mac.html`,
+    // `https://cellphones.com.vn/tablet/ipad-9-7.html`,
+
+    // `https://cellphones.com.vn/laptop/mac.html`,
+    `https://cellphones.com.vn/tablet/ipad-10-2.html`,
   ],
   cookies: [
     {
@@ -146,13 +141,14 @@ async function getProducts() {
         listItem: $(".product_item"),
         name: $("a", ".product_item_title", item),
         price: $(".amount", ".product_item_price", item),
+
       };
     },
     cellphones: function (item) {
       return {
         listItem: $("[data-id]"),
         name: $("#product_link", item),
-        price: $(".price",".special-price", item),
+        price: $(".price", ".special-price", item),
       };
     },
     fptshop: function (item) {
@@ -171,15 +167,28 @@ async function getProducts() {
     },
   };
   function getDetail(text, web, location) {
+    if (!location) {
+      location = 'vietnam';
+    }
     $ = cheerio.load(text);
     let items = selector[web]().listItem;
     items.each((index, item) => {
       let name = selector[web](item).name.text();
       let price = selector[web](item).price.text();
+      if (web == 'techone') {
+
+        if (price.length > 11) {
+          price = price.match(/(.*)₫(.*)₫/)[2];
+
+
+        }
+
+      }
+
       console.log(name, price, web, location);
       insertNewObject(index, { name, price, web, location });
-     
-    
+
+
     });
   }
 
@@ -190,13 +199,13 @@ async function getProducts() {
 
       let res = await fetch(link);
       let text = await res.text();
-      getDetail(text,web);
-      }
+      getDetail(text, web);
+    }
 
   }
-  for (web in listJsWeb){
+  for (web in listJsWeb) {
     for (link of listJsWeb[web]) {
-      let text = await  (async () => {
+      let text = await (async () => {
         const browser = await puppeteer.launch();
         const page = await browser.newPage();
         await page.goto(link);
@@ -205,7 +214,7 @@ async function getProducts() {
 
         return text;
       })();
-      getDetail(text,web);
+      getDetail(text, web);
     }
   }
 
@@ -254,26 +263,26 @@ async function getProducts() {
     let web = "cellphones";
 
     for (cookie of cellPhones.cookies) {
-      
+
       let text = await (async () => {
         const browser = await puppeteer.launch();
         const page = await browser.newPage();
-        await page.goto(link);      
+        await page.goto(link);
         await page.setCookie({ name: "store", value: cookie.value });
         await page.reload();
         let body = await page.$("body");
         let text = await body.evaluate((el) => el.innerHTML);
-        
-        
+
+
 
         async function howManyPages(page) {
           const pages = await page.$(".pagination", ".pages");
           if (pages != null) {
-          
+
             const quantity = await pages.evaluate(
               (el) => Object.keys(el.children).length
             );
-        
+
             return quantity;
           }
           return 1;
@@ -287,12 +296,12 @@ async function getProducts() {
             let bodyNew = await page.$("body");
             let textNew = await bodyNew.evaluate((el) => el.innerHTML);
             text += textNew;
-          
+
           }
         }
-        
-  
-    
+
+
+
         return text;
       })();
 
@@ -301,13 +310,5 @@ async function getProducts() {
   }
 }
 
-await getProducts();
-for (i=0;i<3;i++){
-  let resource = {
-    values: [
-      [1,1,1]
-     
-    ],
-  };  
-  insertData(resource);
-}
+getProducts();
+// insertData();
